@@ -1,12 +1,12 @@
 package com.example.simple_pdf_writer;
 
 import com.itextpdf.text.*;
-import com.itextpdf.text.pdf.BaseFont;
+import com.itextpdf.text.pdf.PdfPCell;
+import com.itextpdf.text.pdf.PdfPTable;
 import com.itextpdf.text.pdf.PdfWriter;
 import javafx.application.Application;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
-import javafx.fxml.FXMLLoader;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
@@ -22,6 +22,10 @@ import javafx.stage.Stage;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.net.URISyntaxException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.stream.Stream;
 
 public class HelloApplication extends Application {
     @Override
@@ -62,12 +66,31 @@ public class HelloApplication extends Application {
                 Font font = FontFactory.getFont(FontFactory.COURIER, 16, BaseColor.BLACK);
                 //Font font2 = FontFactory.getFont(FontFactory.HELVETICA, 16, BaseColor.BLACK); Русский не работает((99(
                 Paragraph chunk = new Paragraph("HSoasasjjdaspdsaoso!", font);
+
                 chunk.setAlignment(Element.ALIGN_CENTER);
                 try {
                     document.add(chunk);
+                    document.add(new Paragraph("\n"));
                 } catch (DocumentException e) {
                     throw new RuntimeException(e);
                 }
+
+                PdfPTable table = new PdfPTable(5);
+
+                try {
+                    addTableHeader(table);
+                } catch (DocumentException e) {
+                    throw new RuntimeException(e);
+                }
+                addRows(table);
+
+
+                try {
+                    document.add(table);
+                } catch (DocumentException e) {
+                    throw new RuntimeException(e);
+                }
+
 
                 Alert alert = new Alert(Alert.AlertType.INFORMATION);
                 alert.setTitle("Поздравление");
@@ -89,6 +112,43 @@ public class HelloApplication extends Application {
         stage.setTitle("PdfCreator");
         stage.setScene(scene);
         stage.show();
+    }
+    private void addTableHeader(PdfPTable table) throws DocumentException {
+        float[] columnWidths = {1f, 1f, 1f, 1f, 1f};
+
+        table.setWidths(columnWidths);
+        Stream.of("column header 1", "column header 2", "column header 3", "column header 4", "column header 5")
+                .forEach(columnTitle -> {
+                    PdfPCell header = new PdfPCell();
+                    header.setBackgroundColor(BaseColor.LIGHT_GRAY);
+                    header.setBorderWidth(2);
+                    header.setPhrase(new Phrase(columnTitle));
+                    table.addCell(header);
+                });
+    }
+    private void addRows(PdfPTable table) {
+        table.addCell("row 1, col 1");
+        table.addCell("row 1, col 2");
+        table.addCell("row 1, col 3");
+        table.addCell("row 1, col 4");
+        table.addCell("row 1, col 5");
+    }
+    private void addCustomRows(PdfPTable table)
+            throws URISyntaxException, BadElementException, IOException {
+        Path path = Paths.get(ClassLoader.getSystemResource("Java_logo.png").toURI());
+        Image img = Image.getInstance(path.toAbsolutePath().toString());
+        img.scalePercent(10);
+
+        PdfPCell imageCell = new PdfPCell(img);
+        table.addCell(imageCell);
+
+        PdfPCell horizontalAlignCell = new PdfPCell(new Phrase("row 2, col 2"));
+        horizontalAlignCell.setHorizontalAlignment(Element.ALIGN_CENTER);
+        table.addCell(horizontalAlignCell);
+
+        PdfPCell verticalAlignCell = new PdfPCell(new Phrase("row 2, col 3"));
+        verticalAlignCell.setVerticalAlignment(Element.ALIGN_BOTTOM);
+        table.addCell(verticalAlignCell);
     }
 
     public static void main(String[] args) {
