@@ -1,9 +1,7 @@
 package com.example.simple_pdf_writer;
 
 import com.itextpdf.text.*;
-import com.itextpdf.text.pdf.PdfPCell;
-import com.itextpdf.text.pdf.PdfPTable;
-import com.itextpdf.text.pdf.PdfWriter;
+import com.itextpdf.text.pdf.*;
 import javafx.application.Application;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
@@ -33,19 +31,41 @@ public class HelloApplication extends Application {
         VBox main = new VBox(10);
 
         HBox first_fields = new HBox(5);
-        Label first_on_first = new Label("Первое поле: ");
-        TextField first_on_first_text = new TextField();
+        Label first_on_first = new Label("Номер акта: ");
+        TextField first_on_first_text = new TextField("5");
+        first_on_first_text.setMaxWidth(50);
         first_fields.getChildren().addAll(first_on_first, first_on_first_text);
 
+        HBox prilag = new HBox(5);
+        Label prilaglab = new Label("Прилагается к: ");
+        TextField prilagtext = new TextField("dogovory ob oplate");
+        prilagtext.setMaxWidth(300);
+        prilag.getChildren().addAll(prilaglab, prilagtext);
+
         HBox second_fields = new HBox(5);
-        Label first_on_second = new Label("Второе поле: ");
-        TextField first_on_second_text = new TextField();
+        Label first_on_second = new Label("Правообладатель: ");
+        TextField first_on_second_text = new TextField("Kortiokov Ivan Johnson");
         second_fields.getChildren().addAll(first_on_second, first_on_second_text);
 
         HBox third_fields = new HBox(5);
-        Label first_on_third = new Label("Третье поле: ");
-        TextField first_on_third_text = new TextField();
+        Label first_on_third = new Label("Приобретатель: ");
+        TextField first_on_third_text = new TextField("Filimonov Petr Edsui");
         third_fields.getChildren().addAll(first_on_third, first_on_third_text);
+
+        HBox four_fields = new HBox(5);
+        Label date = new Label("Дата: ");
+        TextField datetext = new TextField("25.01.2024");
+        four_fields.getChildren().addAll(date, datetext);
+
+        HBox city = new HBox(5);
+        Label citylab = new Label("Сумма: ");
+        TextField citytext = new TextField("139500");
+        city.getChildren().addAll(citylab, citytext);
+
+        HBox tovar = new HBox(5);
+        Label tovarlab = new Label("Товар: ");
+        TextField tovartext = new TextField("New Year Custom Petards");
+        tovar.getChildren().addAll(tovarlab, tovartext);
 
         Button create_document = new Button("Создать документ");
         create_document.setOnAction(new EventHandler<ActionEvent>() {
@@ -63,33 +83,92 @@ public class HelloApplication extends Application {
 
                 document.open();
 
-                Font font = FontFactory.getFont(FontFactory.COURIER, 16, BaseColor.BLACK);
-                //Font font2 = FontFactory.getFont(FontFactory.HELVETICA, 16, BaseColor.BLACK); Русский не работает((99(
-                Paragraph chunk = new Paragraph("HSoasasjjdaspdsaoso!", font);
+                Font font2 = FontFactory.getFont("arial.ttf", "Cp1251", BaseFont.EMBEDDED, 14, Font.NORMAL, BaseColor.BLACK);
+                Font font3 = FontFactory.getFont("arial.ttf", "Cp1251", BaseFont.EMBEDDED, 12, Font.NORMAL, BaseColor.BLACK);
+                //Font font = FontFactory.getFont(FontFactory.SYMBOL, 16, BaseColor.BLACK);
+                Paragraph chunk = new Paragraph("Prilozhenie No: _" + first_on_first_text.getText() + "_   k \n _"+ prilagtext.getText() + "_ \n No "+ first_on_first_text.getText()+ " ot "+ datetext.getText(), font2);
 
-                chunk.setAlignment(Element.ALIGN_CENTER);
+                chunk.setAlignment(Element.ALIGN_RIGHT);
                 try {
                     document.add(chunk);
                     document.add(new Paragraph("\n"));
                 } catch (DocumentException e) {
                     throw new RuntimeException(e);
                 }
+                Paragraph chunk2 = new Paragraph("Akt priema-peredachi isluchitelnux prav No _"+ first_on_first_text.getText() + "_",font2);
+                chunk2.setAlignment(Element.ALIGN_CENTER);
+                try {
+                    document.add(chunk2);
+                    document.add(new Paragraph("\n"));
+                } catch (DocumentException e) {
+                    throw new RuntimeException(e);
+                }
 
-                PdfPTable table = new PdfPTable(5);
+                PdfPTable table = new PdfPTable(1);
+                table.setWidthPercentage(100);
 
+                PdfPCell cell = new PdfPCell(new Phrase("Pravoobladatel' v lice " + first_on_second_text.getText() + " deistvuishiu na osnovanii passporta \n s odnou storonu" +
+                        ", imenuemui dalee 'Proobladatel'', i Priobretatel' v lice \n " + first_on_third_text.getText() + " , imenuemui dalee Priobretatel' ", font3));
+                cell.setHorizontalAlignment(Element.ALIGN_JUSTIFIED_ALL);
+                cell.setBorder(Rectangle.NO_BORDER);
+                table.addCell(cell);
+
+                // ... (добавление других параграфов)
+                try {
+                    document.add(table);
+                } catch (DocumentException e) {
+                    throw new RuntimeException(e);
+                }
+
+                PdfPTable table2 = new PdfPTable(1);
+                table2.setWidthPercentage(100);
+                PdfPCell cell2 = new PdfPCell(new Phrase("\t \t \t1. Pravoobladatel' peredal, a Priobretatel' v svoyu ochered' prinyal isklyuchitel'nye prava" +
+                        " na _"+ tovartext.getText()+ "_  v sootvetstvii s usloviyami Dogovora.", font3));
+                cell2.setHorizontalAlignment(Element.ALIGN_JUSTIFIED_ALL);
+                cell2.setBorder(Rectangle.NO_BORDER);
+                table2.addCell(cell2);
+                cell2 = new PdfPCell(new Phrase("\t \t \t 2. Priobretatel' peredal Pravoobladatelyu "+ citytext.getText()+" rubley " +
+                        "nalichnymi v kachestve oplaty za priobretenie prav.", font3));
+                cell2.setHorizontalAlignment(Element.ALIGN_JUSTIFIED_ALL);
+                cell2.setBorder(Rectangle.NO_BORDER);
+                table2.addCell(cell2);
+                cell2 = new PdfPCell(new Phrase("\t \t \t 3. Pravoobladatel' pretenziy ne imeet.", font3));
+                cell2.setHorizontalAlignment(Element.ALIGN_JUSTIFIED);
+                cell2.setBorder(Rectangle.NO_BORDER);
+                table2.addCell(cell2);
+                cell2 = new PdfPCell(new Phrase("\t \t \t 4. Nastoyashchiy dokument sostavlen v dvukh ravnakh po yuridicheskoy sile ekzemplaryakh, po odnomu dlya kazhdogo iz kontragentov.", font3));
+                cell2.setHorizontalAlignment(Element.ALIGN_JUSTIFIED_ALL);
+                cell2.setBorder(Rectangle.NO_BORDER);
+                table2.addCell(cell2);
+
+                table2.setSpacingBefore(20f);
+                try {
+                    document.add(table2);
+                } catch (DocumentException e) {
+                    throw new RuntimeException(e);
+                }
+
+                Paragraph fin = new Paragraph("Pravoobladatel': " + first_on_second_text.getText());
+                Paragraph fin2 = new Paragraph("Priobretatel': " + first_on_third_text.getText());
+                try {
+                    document.add(new Paragraph("\n"));
+                    document.add(fin);
+                    document.add(fin2);
+                } catch (DocumentException e) {
+                    throw new RuntimeException(e);
+                }
+               /* PdfPTable table = new PdfPTable(5);
                 try {
                     addTableHeader(table);
                 } catch (DocumentException e) {
                     throw new RuntimeException(e);
                 }
                 addRows(table);
-
-
                 try {
                     document.add(table);
                 } catch (DocumentException e) {
                     throw new RuntimeException(e);
-                }
+                }*/
 
 
                 Alert alert = new Alert(Alert.AlertType.INFORMATION);
@@ -106,9 +185,9 @@ public class HelloApplication extends Application {
 
         Insets insets = new Insets(30,30,30,30);
         main.setPadding(insets);
-        main.getChildren().addAll(first_fields, second_fields, third_fields, create_document);
+        main.getChildren().addAll(first_fields, prilag, second_fields, third_fields, four_fields, city, tovar, create_document);
         main.setAlignment(Pos.CENTER);
-        Scene scene = new Scene(main, 320, 240);
+        Scene scene = new Scene(main, 400, 300);
         stage.setTitle("PdfCreator");
         stage.setScene(scene);
         stage.show();
